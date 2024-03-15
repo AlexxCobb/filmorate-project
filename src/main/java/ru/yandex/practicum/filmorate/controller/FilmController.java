@@ -15,22 +15,16 @@ import java.util.Map;
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-
     private final Map<Integer, Film> films = new HashMap<>();
     private int idGenerator = 1;
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        if (films.containsKey(film.getId())) {
-            log.info("Фильм с таким id" + film.getId() + "уже существует.");
-            throw new NotValidIdException("Фильм с таким id" + film.getId() + "уже существует.");
-        } else {
-            film.setId(idGenerator);
-            log.info("Фильм добавлен, присвоен номер id: {}.", film.getId());
-            films.put(film.getId(), film);
-            idGenerator++;
-            return film;
-        }
+        film.setId(idGenerator);
+        log.info("Фильм добавлен, присвоен номер id: {}.", film.getId());
+        films.put(film.getId(), film);
+        idGenerator++;
+        return film;
     }
 
     @PutMapping

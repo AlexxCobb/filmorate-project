@@ -12,6 +12,6 @@ public class ReleaseDateValidator implements ConstraintValidator<ValidReleaseDat
 
     @Override
     public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
-        return (value.isAfter(movieBirthday) && value.isBefore(LocalDate.now()));
+        return (value != null && value.isAfter(movieBirthday));
     }
 }

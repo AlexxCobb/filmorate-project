@@ -31,6 +31,7 @@ public class UserValidTests {
         User user = new User();
         user.setLogin("Apollo");
         user.setEmail("Apollo.13");
+        user.setBirthday(LocalDate.of(2000, 2, 20));
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         assertFalse(violations.isEmpty());
         assertThat(violations.size()).isEqualTo(1);
@@ -41,6 +42,7 @@ public class UserValidTests {
         User user = new User();
         user.setLogin("Apollo 13");
         user.setEmail("Apollo@mail.ru");
+        user.setBirthday(LocalDate.of(2000, 2, 20));
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         assertFalse(violations.isEmpty());
         assertThat(violations.size()).isEqualTo(1);
@@ -51,6 +53,7 @@ public class UserValidTests {
         User user = new User();
         user.setLogin("");
         user.setEmail("Apollo@mail.ru");
+        user.setBirthday(LocalDate.of(2000, 2, 20));
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         assertFalse(violations.isEmpty());
         assertThat(violations.size()).isEqualTo(1);
@@ -61,6 +64,7 @@ public class UserValidTests {
         User user = new User();
         user.setLogin("Apollo");
         user.setEmail("Apollo@mail.ru");
+        user.setBirthday(LocalDate.of(2000, 2, 20));
         UserController userController = new UserController();
         userController.addUser(user);
         Set<ConstraintViolation<User>> violations = validator.validate(user);
@@ -69,11 +73,22 @@ public class UserValidTests {
     }
 
     @Test
-    public void whenUserWithInvalidLocalDataThenFailValidation() {
+    public void whenUserWithInvalidLocalDateThenFailValidation() {
         User user = new User();
         user.setLogin("Apollo");
         user.setEmail("Apollo@mail.ru");
         user.setBirthday(LocalDate.of(2030, 11, 11));
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertFalse(violations.isEmpty());
+        assertThat(violations.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void whenUserWithNullLocalDateThenFailValidation() {
+        User user = new User();
+        user.setLogin("Apollo");
+        user.setEmail("Apollo@mail.ru");
+        user.setBirthday(null);
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         assertFalse(violations.isEmpty());
         assertThat(violations.size()).isEqualTo(1);

@@ -29,7 +29,9 @@ public class FilmValidTests {
     public void whenFilmWithEmptyNameThenFailValidation() {
         Film film = new Film();
         film.setName("");
+        film.setDescription("description");
         film.setReleaseDate(LocalDate.of(2000, 2, 20));
+        film.setDuration(10);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty());
         assertThat(violations.size()).isEqualTo(1);
@@ -40,43 +42,58 @@ public class FilmValidTests {
         Film film = new Film();
         film.setName("Inception");
         film.setReleaseDate(LocalDate.of(2010, 7, 8));
-        film.setDescription("Кобб – талантливый вор, лучший из лучших в опасном искусстве " +
-                "извлечения: он крадет ценные секреты из глубин подсознания во время сна, " +
-                "когда человеческий разум наиболее уязвим. " +
-                "Редкие способности Кобба сделали его ценным игроком в привычном " +
-                "к предательству мире промышленного шпионажа, но они же превратили " +
-                "его в извечного беглеца и лишили всего, что он когда-либо любил.\n" +
+        film.setDescription("РљРѕР±Р± вЂ“ С‚Р°Р»Р°РЅС‚Р»РёРІС‹Р№ РІРѕСЂ, Р»СѓС‡С€РёР№ РёР· Р»СѓС‡С€РёС… РІ РѕРїР°СЃРЅРѕРј РёСЃРєСѓСЃСЃС‚РІРµ РёР·РІР»РµС‡РµРЅРёСЏ: " +
+                "РѕРЅ РєСЂР°РґРµС‚ С†РµРЅРЅС‹Рµ СЃРµРєСЂРµС‚С‹ РёР· РіР»СѓР±РёРЅ РїРѕРґСЃРѕР·РЅР°РЅРёСЏ РІРѕ РІСЂРµРјСЏ СЃРЅР°, " +
+                "РєРѕРіРґР° С‡РµР»РѕРІРµС‡РµСЃРєРёР№ СЂР°Р·СѓРј РЅР°РёР±РѕР»РµРµ СѓСЏР·РІРёРј. Р РµРґРєРёРµ СЃРїРѕСЃРѕР±РЅРѕСЃС‚Рё РљРѕР±Р±Р° " +
+                "СЃРґРµР»Р°Р»Рё РµРіРѕ С†РµРЅРЅС‹Рј РёРіСЂРѕРєРѕРј РІ РїСЂРёРІС‹С‡РЅРѕРј Рє РїСЂРµРґР°С‚РµР»СЊСЃС‚РІСѓ РјРёСЂРµ РїСЂРѕРјС‹С€Р»РµРЅРЅРѕРіРѕ С€РїРёРѕРЅР°Р¶Р°, " +
+                "РЅРѕ РѕРЅРё Р¶Рµ РїСЂРµРІСЂР°С‚РёР»Рё РµРіРѕ РІ РёР·РІРµС‡РЅРѕРіРѕ Р±РµРіР»РµС†Р° Рё Р»РёС€РёР»Рё РІСЃРµРіРѕ, С‡С‚Рѕ РѕРЅ РєРѕРіРґР°-Р»РёР±Рѕ Р»СЋР±РёР».\n" +
                 "\n" +
-                "И вот у Кобба появляется шанс исправить ошибки. Его " +
-                "последнее дело может вернуть все назад, но для этого ему " +
-                "нужно совершить невозможное – инициацию. Вместо идеальной " +
-                "кражи Кобб и его команда спецов должны будут провернуть обратное. " +
-                "Теперь их задача – не украсть идею, а внедрить ее. " +
-                "Если у них получится, это и станет идеальным преступлением.\n" +
+                "Р РІРѕС‚ Сѓ РљРѕР±Р±Р° РїРѕСЏРІР»СЏРµС‚СЃСЏ С€Р°РЅСЃ РёСЃРїСЂР°РІРёС‚СЊ РѕС€РёР±РєРё. Р•РіРѕ РїРѕСЃР»РµРґРЅРµРµ РґРµР»Рѕ РјРѕР¶РµС‚ " +
+                "РІРµСЂРЅСѓС‚СЊ РІСЃРµ РЅР°Р·Р°Рґ, РЅРѕ РґР»СЏ СЌС‚РѕРіРѕ РµРјСѓ РЅСѓР¶РЅРѕ СЃРѕРІРµСЂС€РёС‚СЊ РЅРµРІРѕР·РјРѕР¶РЅРѕРµ вЂ“ РёРЅРёС†РёР°С†РёСЋ. " +
+                "Р’РјРµСЃС‚Рѕ РёРґРµР°Р»СЊРЅРѕР№ РєСЂР°Р¶Рё РљРѕР±Р± Рё РµРіРѕ РєРѕРјР°РЅРґР° СЃРїРµС†РѕРІ РґРѕР»Р¶РЅС‹ Р±СѓРґСѓС‚ РїСЂРѕРІРµСЂРЅСѓС‚СЊ РѕР±СЂР°С‚РЅРѕРµ. " +
+                "РўРµРїРµСЂСЊ РёС… Р·Р°РґР°С‡Р° вЂ“ РЅРµ СѓРєСЂР°СЃС‚СЊ РёРґРµСЋ, Р° РІРЅРµРґСЂРёС‚СЊ РµРµ. Р•СЃР»Рё Сѓ РЅРёС… РїРѕР»СѓС‡РёС‚СЃСЏ, " +
+                "СЌС‚Рѕ Рё СЃС‚Р°РЅРµС‚ РёРґРµР°Р»СЊРЅС‹Рј РїСЂРµСЃС‚СѓРїР»РµРЅРёРµРј.\n" +
                 "\n" +
-                "Но никакое планирование или мастерство не могут подготовить " +
-                "команду к встрече с опасным противником, который, кажется, " +
-                "предугадывает каждый их ход. Врагом, увидеть которого мог бы лишь Кобб.");
+                "РќРѕ РЅРёРєР°РєРѕРµ РїР»Р°РЅРёСЂРѕРІР°РЅРёРµ РёР»Рё РјР°СЃС‚РµСЂСЃС‚РІРѕ РЅРµ РјРѕРіСѓС‚ РїРѕРґРіРѕС‚РѕРІРёС‚СЊ РєРѕРјР°РЅРґСѓ Рє РІСЃС‚СЂРµС‡Рµ " +
+                "СЃ РѕРїР°СЃРЅС‹Рј РїСЂРѕС‚РёРІРЅРёРєРѕРј, РєРѕС‚РѕСЂС‹Р№, РєР°Р¶РµС‚СЃСЏ, РїСЂРµРґСѓРіР°РґС‹РІР°РµС‚ РєР°Р¶РґС‹Р№ РёС… С…РѕРґ. Р’СЂР°РіРѕРј, " +
+                "СѓРІРёРґРµС‚СЊ РєРѕС‚РѕСЂРѕРіРѕ РјРѕРі Р±С‹ Р»РёС€СЊ РљРѕР±Р±.");
+        film.setDuration(148);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty());
         assertThat(violations.size()).isEqualTo(1);
     }
 
     @Test
-    public void whenFilmWithInvalidDateReleaseInPastThenFailValidation() {
+    public void whenFilmWithInvalidDateReleaseThenFailValidation() {
         Film film = new Film();
         film.setName("Tristan and Isolde");
         film.setReleaseDate(LocalDate.of(1210, 2, 20));
+        film.setDuration(130);
+        film.setDescription("novel");
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty());
         assertThat(violations.size()).isEqualTo(1);
     }
 
     @Test
-    public void whenFilmWithInvalidDateReleaseInFutureThenFailValidation() {
+    public void whenFilmWithNullDateReleaseThenFailValidation() {
+        Film film = new Film();
+        film.setName("Tristan and Isolde");
+        film.setReleaseDate(null);
+        film.setDuration(130);
+        film.setDescription("novel");
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertFalse(violations.isEmpty());
+        assertThat(violations.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void whenFilmWithNullDurationFailValidation() {
         Film film = new Film();
         film.setName("Putin - The King");
         film.setReleaseDate(LocalDate.of(2210, 2, 20));
+        film.setDescription("poem");
+        film.setDuration(null);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty());
         assertThat(violations.size()).isEqualTo(1);
@@ -86,6 +103,8 @@ public class FilmValidTests {
     public void whenFilmWithInvalidDurationThenFailValidation() {
         Film film = new Film();
         film.setName("La grande bellezza");
+        film.setDescription("Р‘РѕРіРµРјРЅС‹Р№ РїРёСЃР°С‚РµР»СЊ Р·Р°РґСѓРјС‹РІР°РµС‚СЃСЏ Рѕ СЃРјС‹СЃР»Рµ Р¶РёР·РЅРё. " +
+                "РЁРµРґРµРІСЂ РџР°РѕР»Рѕ РЎРѕСЂСЂРµРЅС‚РёРЅРѕ Рѕ РґСѓС€РµРІРЅРѕР№ РїСѓСЃС‚РѕС‚Рµ, Р·Р°Р»РёС‚РѕР№ С€Р°РјРїР°РЅСЃРєРёРј");
         film.setReleaseDate(LocalDate.of(2013, 5, 21));
         film.setDuration(-141);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);

@@ -25,9 +25,7 @@ public class UserController {
             throw new NotValidIdException("Пользователь с таким id" + user.getId() + "уже существует.");
         } else {
             user.setId(idGenerator);
-            if (user.getName() == null || user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            }
+            checkName(user);
             log.info("Пользователь добавлен, присвоен номер id: {}.", user.getId());
             users.put(user.getId(), user);
             idGenerator++;
@@ -39,6 +37,7 @@ public class UserController {
     public User updateUser(@Valid @RequestBody User user) {
         if (users.containsKey(user.getId())) {
             log.info("Пользователь с номером id: {}, обновлен.", user.getId());
+            checkName(user);
             users.put(user.getId(), user);
         } else {
             log.info("Пользователь с таким id: " + user.getId() + "отсутствует");
@@ -50,5 +49,11 @@ public class UserController {
     @GetMapping
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
+    }
+
+    private void checkName(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
     }
 }

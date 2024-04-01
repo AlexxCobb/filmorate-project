@@ -1,1 +1,1 @@
-Spring Boot приложение Filmorate.
+Spring Boot Filmorate.

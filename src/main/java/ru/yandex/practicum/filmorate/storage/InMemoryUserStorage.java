@@ -2,15 +2,11 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotValidIdException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -22,7 +18,6 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         user.setId(idGenerator);
-        checkName(user);
         log.info("Пользователь добавлен, присвоен номер id: {}.", user.getId());
         users.put(user.getId(), user);
         idGenerator++;
@@ -33,12 +28,11 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(User user) {
         if (users.containsKey(user.getId())) {
             log.info("Пользователь с номером id: {}, обновлен.", user.getId());
-            checkName(user);
             users.put(user.getId(), user);
             return user;
         } else {
             log.info("Пользователь с таким id: " + user.getId() + " отсутствует");
-            throw new NotValidIdException("Пользователь с таким id: " + user.getId() + " отсутствует");
+            throw new NotFoundException("Пользователь с таким id: " + user.getId() + " отсутствует");
         }
     }
 
@@ -47,18 +41,8 @@ public class InMemoryUserStorage implements UserStorage {
         return new ArrayList<>(users.values());
     }
 
-    private void checkName(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-    }
-
     @Override
-    public User getUserById(Long id) {
-        if (users.containsKey(id)) {
-            return users.get(id);
-        } else {
-            throw new UserNotFoundException("Пользователь с таким id: " + id + "отсутствует");
-        }
+    public Optional<User> getUserById(Long id) {
+        return Optional.ofNullable(users.get(id));
     }
 }

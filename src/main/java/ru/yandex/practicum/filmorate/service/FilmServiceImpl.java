@@ -2,16 +2,14 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotValidLikeException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.interfaces.FilmService;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,21 +36,16 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film getFilmById(Long id) {
-        return filmStorage.getFilmById(id);
+        return filmStorage.getFilmById(id).orElseThrow(
+                () -> new NotFoundException(String.format("Фильм с таким id: %s, отсутствует", id)));
     }
 
     @Override
     public Film addLike(Long filmId, Long userId) {
-        var film = filmStorage.getFilmById(filmId);
-        userStorage.getUserById(userId);
-        if (film.getLikeIds() == null) {
-            Set<Long> filmAddLikeId = new HashSet<>();
-            filmAddLikeId.add(userId);
-            film.setLikeIds(filmAddLikeId);
-            return film;
-        }
+        var film = getFilmById(filmId);
+        userStorage.getUserById(userId).orElseThrow(() -> new NotFoundException(String.format("Фильм с таким id: %s, отсутствует", userId)));
         if (film.getLikeIds().contains(userId)) {
-            throw new NotValidLikeException("One user - one like, exceeded the allowed number of likes");
+            throw new NotFoundException("One user - one like, exceeded the allowed number of likes");
         }
         film.getLikeIds().add(userId);
         return film;
@@ -60,12 +53,10 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public void deleteLike(Long filmId, Long userId) {
-        var film = filmStorage.getFilmById(filmId);
-        userStorage.getUserById(userId);
-        if (film.getLikeIds().contains(userId)) {
-            film.getLikeIds().remove(userId);
-        } else {
-            throw new NotValidLikeException(
+        var film = getFilmById(filmId);
+        userStorage.getUserById(userId).orElseThrow(() -> new NotFoundException(String.format("Фильм с таким id: %s, отсутствует", userId)));
+        if (!film.getLikeIds().remove(userId)) {
+            throw new NotFoundException(
                     String.format("No like from user with id - %s to film with id - %s", userId, filmId));
         }
     }

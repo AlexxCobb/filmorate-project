@@ -2,8 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FriendsDoesNotExistException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.interfaces.UserService;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
@@ -20,12 +19,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User addUser(User user) {
-        return userStorage.addUser(user);
+        var createdUser = userStorage.addUser(user);
+        checkName(user);
+        return createdUser;
     }
 
     @Override
     public User updateUser(User user) {
-        return userStorage.updateUser(user);
+        var updatedUser = userStorage.updateUser(user);
+        checkName(updatedUser);
+        return updatedUser;
     }
 
     @Override
@@ -35,27 +38,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(Long id) {
-        return userStorage.getUserById(id);
+        return userStorage.getUserById(id).orElseThrow(
+                () -> new NotFoundException(String.format("Пользователь с таким id: %s, отсутствует", id)));
     }
 
     @Override
     public User addFriend(Long userId, Long friendId) {
-        var user = userStorage.getUserById(userId);
-        var friend = userStorage.getUserById(friendId);
-
-        if (user.getFriendsIds() == null && friend.getFriendsIds() == null) { // изменил || на &&
-            Set<Long> userAddFriendId = new HashSet<>();
-            userAddFriendId.add(friendId);
-            user.setFriendsIds(userAddFriendId);
-            updateUser(user);
-
-            Set<Long> friendAddUserId = new HashSet<>();
-            friendAddUserId.add(userId);
-            friend.setFriendsIds(friendAddUserId);
-            updateUser(friend);
-        }
-        checkFriendsIds(user);
-        checkFriendsIds(friend);
+        var user = getUserById(userId);
+        var friend = getUserById(friendId);
         user.getFriendsIds().add(friendId);
         friend.getFriendsIds().add(userId);
         return user;
@@ -63,26 +53,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteFriend(Long userId, Long friendId) {
-        var user = userStorage.getUserById(userId);
-        var friend = userStorage.getUserById(friendId);
-        checkFriendsIds(user);
-        checkFriendsIds(friend);
-        if (user.getFriendsIds().contains(friendId) && friend.getFriendsIds().contains(userId)) {
-            user.getFriendsIds().remove(friendId);
-            friend.getFriendsIds().remove(userId);
-        }
+        var user = getUserById(userId);
+        var friend = getUserById(friendId);
+        user.getFriendsIds().remove(friendId);
+        friend.getFriendsIds().remove(userId);
     }
 
     @Override
     public List<User> getFriends(Long id) {
-        var user = userStorage.getUserById(id);
+        var user = getUserById(id);
         List<User> userFriends = new ArrayList<>();
-        checkFriendsIds(user);
         for (Long friendsId : user.getFriendsIds()) {
-            if (userStorage.getUserById(friendsId) != null) {
-                userFriends.add(userStorage.getUserById(friendsId));
+            if (getUserById(friendsId) != null) {
+                userFriends.add(getUserById(friendsId));
             } else {
-                throw new UserNotFoundException("User id doesn't exist");
+                throw new NotFoundException("User id doesn't exist");
             }
         }
         return userFriends;
@@ -90,11 +75,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> commonFriends(Long userFirst, Long userSecond) {
-        var user = userStorage.getUserById(userFirst);
-        var friend = userStorage.getUserById(userSecond);
-
-        checkFriendsIds(user);
-        checkFriendsIds(friend);
+        var user = getUserById(userFirst);
+        var friend = getUserById(userSecond);
 
         Set<Long> userFriendsIds = user.getFriendsIds();
         Set<Long> friendFriendsIds = friend.getFriendsIds();
@@ -103,18 +85,18 @@ public class UserServiceImpl implements UserService {
 
         List<User> commonUsers = new ArrayList<>();
         for (Long commonFriendId : commonFriends) {
-            if (userStorage.getUserById(commonFriendId) != null) {
-                commonUsers.add(userStorage.getUserById(commonFriendId));
+            if (getUserById(commonFriendId) != null) {
+                commonUsers.add(getUserById(commonFriendId));
             } else {
-                throw new UserNotFoundException("User id doesn't exist");
+                throw new NotFoundException("User id doesn't exist");
             }
         }
         return commonUsers;
     }
 
-    private void checkFriendsIds(User user) {
-        if (user.getFriendsIds() == null) {
-            throw new FriendsDoesNotExistException("User don't have friends");
+    private void checkName(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
     }
 }

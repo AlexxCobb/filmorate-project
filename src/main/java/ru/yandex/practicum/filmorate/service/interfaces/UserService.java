@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.interfaces;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
     User addUser(User user);

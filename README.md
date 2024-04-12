@@ -25,5 +25,5 @@ SELECT film_id,
       release_date,
       duration,
       rating_MPA_id
-FROM films
+FROM films;
 ```

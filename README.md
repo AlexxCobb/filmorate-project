@@ -1,6 +1,5 @@
 :wave: Spring Boot project - Filmorate.
 
-
 ![ER diagram](ER_diagram.png)
 
 ### **Примеры запросов.**
@@ -19,11 +18,6 @@ LIMIT 10;
 Получение всех фильмов:
 
 ```
-SELECT film_id,
-      name,
-      description,
-      release_date,
-      duration,
-      rating_MPA_id
+SELECT *
 FROM films;
 ```

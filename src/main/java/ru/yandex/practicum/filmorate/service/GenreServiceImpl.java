@@ -25,8 +25,8 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     public Genre getGenreById(Integer id) {
-        return genreStorage.findGenreById(id).
-                orElseThrow(() -> new NotFoundException(String.format("Жанр с таким id: %s, отсутствует", id)));
+        return genreStorage.findGenreById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Жанр с таким id: %s, отсутствует", id)));
     }
 
     @Override

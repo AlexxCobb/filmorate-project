@@ -25,13 +25,13 @@ public class MpaServiceImpl implements MpaService {
 
     @Override
     public Mpa getMpaRatingById(Integer id) {
-        return mpaStorage.findRatingById(id).
-                orElseThrow(() -> new BadRequestException(String.format("Передан отсутствующий Mpa с id: %s.", id)));
+        return mpaStorage.findRatingById(id)
+                .orElseThrow(() -> new BadRequestException(String.format("Передан отсутствующий Mpa с id: %s.", id)));
     }
 
     @Override
     public Mpa getRatingByFilmId(Long id) {
-        return mpaStorage.findRatingByFilmId(id).
-                orElseThrow(() -> new NotFoundException(String.format("Mpa с film id: %s не существует", id)));
+        return mpaStorage.findRatingByFilmId(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Mpa с film id: %s не существует", id)));
     }
 }

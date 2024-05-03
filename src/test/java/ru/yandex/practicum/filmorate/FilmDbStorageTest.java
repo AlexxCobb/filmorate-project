@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class FilmDbStorageTest {
-
     private final JdbcTemplate jdbcTemplate;
 
     @Test
@@ -125,7 +124,6 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(mpa)
                 .build();
-
         var createdFilm1 = filmStorage.addFilm(newFilm1);
 
         User newUser = User.builder()
@@ -154,7 +152,6 @@ public class FilmDbStorageTest {
                 .releaseDate(LocalDate.of(2020, 12, 12))
                 .mpa(mpa)
                 .build();
-
         var createdFilm1 = filmStorage.addFilm(newFilm1);
 
         User newUser = User.builder()
@@ -233,7 +230,6 @@ public class FilmDbStorageTest {
         assertEquals(films, filmsDb);
     }
 
-
     @Test
     public void testAddGenreToFilm() {
         FilmDbStorage filmStorage = new FilmDbStorage(jdbcTemplate);
@@ -252,7 +248,6 @@ public class FilmDbStorageTest {
         filmStorage.addGenreToFilm(createdFilm1.getId(), 1);
         assertTrue(genreAdded(createdFilm1.getId(), 1));
     }
-
 
     private boolean likeAdded(Long filmId, Long userId) {
         String sql = "SELECT COUNT(1) FROM like_films where film_id = ? and user_id = ?";

@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -21,7 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
-@Primary
 @Component
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
@@ -110,6 +108,17 @@ public class FilmDbStorage implements FilmStorage {
     public void addGenreToFilm(Long filmId, Integer genreId) {
         String sqlQuery = "insert into film_genres (film_id, genre_id) values (?, ?)";
         jdbcTemplate.update(sqlQuery, filmId, genreId);
+    }
+
+    @Override
+    public void addGenresToFilm(Long filmId, List<Integer> genreIds) {
+        String sqlQuery = "insert into film_genres (film_id, genre_id) values";
+        StringBuilder values = new StringBuilder();
+        for (Integer genreId : genreIds) {
+            values.append("(").append(filmId).append(",").append(genreId).append("),");
+        }
+        values.setLength(values.length() - 1);
+        jdbcTemplate.update(sqlQuery + values);
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {

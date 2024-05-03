@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,8 +25,8 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Set<Genre> getAllGenres() {
-        String sqlQuery = "select * from genres";
-        return new HashSet<>(jdbcTemplate.query(sqlQuery, this::mapRowToGenre));
+        String sqlQuery = "select * from genres order by id";
+        return new LinkedHashSet<>(jdbcTemplate.query(sqlQuery, this::mapRowToGenre));
     }
 
     @Override

@@ -1,48 +1,50 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.BadRequestException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.interfaces.*;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
-
-    @Autowired
-    private FilmStorage filmStorage;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private MpaService mpaService;
-    @Autowired
-    private GenreService genreService;
-    @Autowired
-    private LikesService likesService;
+    private final FilmStorage filmStorage;
+    private final UserService userService;
+    private final MpaService mpaService;
+    private final GenreService genreService;
+    private final LikesService likesService;
 
     @Override
     public Film addFilm(Film film) {
-        if (film.getMpa().getId() < 0 || film.getMpa().getId() > 5) {
+        var mpaIds = mpaService.getAllMpaRatings().stream().map(Mpa::getId).collect(Collectors.toList());
+        if (!mpaIds.contains(film.getMpa().getId())) {
             throw new BadRequestException("Передан не существующий рейтинг Mpa.");
         }
         if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                if (genre.getId() < 0 || genre.getId() > 6) {
-                    throw new BadRequestException("Передан не существующий рейтинг");
+            var genresIdsDb = genreService.getAllGenres()
+                    .stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toList());
+            var filmsGenres = film.getGenres()
+                    .stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toList());
+            for (Integer filmsGenreId : filmsGenres) {
+                if (!genresIdsDb.contains(filmsGenreId)) {
+                    throw new BadRequestException("Передан не существующий жанр");
                 }
             }
         }
         Film createdFilm = filmStorage.addFilm(film);
-
         if (film.getLikeIds() == null) {
             film.setLikeIds(new HashSet<>());
         }
@@ -51,27 +53,42 @@ public class FilmServiceImpl implements FilmService {
                 filmStorage.addLike(createdFilm.getId(), likeId);
             }
         }
-        Optional.ofNullable(film.getGenres())
-                .stream()
-                .flatMap(Collection::stream)
-                .map(Genre::getId)
-                .forEach(genreId -> filmStorage.addGenreToFilm(createdFilm.getId(), genreId));
+        if (film.getGenres() != null) {
+            List<Integer> films = film.getGenres()
+                    .stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toList());
+            filmStorage.addGenresToFilm(film.getId(), films);
+        }
         return createdFilm;
     }
 
     @Override
     public Film updateFilm(Film film) {
-        if (film.getMpa().getId() < 0 || film.getMpa().getId() > 5) {
+        var mpaIds = mpaService.getAllMpaRatings()
+                .stream()
+                .map(Mpa::getId)
+                .collect(Collectors.toList());
+
+        if (!mpaIds.contains(film.getMpa().getId())) {
             throw new BadRequestException("Передан не существующий рейтинг Mpa.");
         }
+
         if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                if (genre.getId() < 0 || genre.getId() > 6) {
-                    throw new BadRequestException("Передан не существующий рейтинг");
+            var genresIdsDb = genreService.getAllGenres()
+                    .stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toList());
+            var filmsGenres = film.getGenres()
+                    .stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toList());
+            for (Integer filmsGenreId : filmsGenres) {
+                if (!genresIdsDb.contains(filmsGenreId)) {
+                    throw new BadRequestException("Передан не существующий жанр");
                 }
             }
         }
-
         Film updatedFilm = filmStorage.updateFilm(film);
 
         if (film.getLikeIds() != null) {
@@ -83,12 +100,9 @@ public class FilmServiceImpl implements FilmService {
         if (film.getGenres() != null) {
             List<Integer> genresIds = film.getGenres().stream().map(Genre::getId).collect(Collectors.toList());
             if (!genresIds.isEmpty()) {
-                for (Integer genresId : genresIds) {
-                    filmStorage.addGenreToFilm(updatedFilm.getId(), genresId);
-                }
+                filmStorage.addGenresToFilm(film.getId(), genresIds);
             }
         }
-
         return updatedFilm;
     }
 
@@ -139,6 +153,5 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public List<Film> getPopularFilms(Long size) {
         return filmStorage.getPopularFilms(size);
-
     }
 }

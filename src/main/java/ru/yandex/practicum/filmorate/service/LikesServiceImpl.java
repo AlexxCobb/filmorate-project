@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.service.interfaces.LikesService;
 import ru.yandex.practicum.filmorate.storage.interfaces.LikesStorage;
@@ -8,10 +8,10 @@ import ru.yandex.practicum.filmorate.storage.interfaces.LikesStorage;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class LikesServiceImpl implements LikesService {
 
-    @Autowired
-    private LikesStorage likesStorage;
+    private final LikesStorage likesStorage;
 
     @Override
     public Set<Long> getLikes(Long id) {

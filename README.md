@@ -1,8 +1,6 @@
 :wave: Spring Boot project - Filmorate.
 
-
 ![ER diagram](ER_diagram.png)
-
 ### **Примеры запросов.**
 
 Получение 10 популярных фильмов:

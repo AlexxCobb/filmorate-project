@@ -13,8 +13,6 @@ import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -65,14 +63,14 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getAllFilms() {
         String sqlQuery = "select * from films";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
+        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm);
     }
 
     @Override
     public Optional<Film> findFilmById(Long id) {
         String sqlQuery = "select * from films where id = ?";
         try {
-            Film film = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
+            Film film = jdbcTemplate.queryForObject(sqlQuery, MapRowClass::mapRowToFilm, id);
             return Optional.ofNullable(film);
         } catch (
                 DataAccessException e) {
@@ -101,7 +99,7 @@ public class FilmDbStorage implements FilmStorage {
                 "group by l.film_id " +
                 "order by count(l.user_id) desc " +
                 "limit ?";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, count);
     }
 
     @Override
@@ -119,15 +117,5 @@ public class FilmDbStorage implements FilmStorage {
         }
         values.setLength(values.length() - 1);
         jdbcTemplate.update(sqlQuery + values);
-    }
-
-    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        return Film.builder()
-                .id(resultSet.getLong("id"))
-                .name(resultSet.getString("name"))
-                .description(resultSet.getString("description"))
-                .releaseDate(resultSet.getDate("release_date").toLocalDate())
-                .duration(resultSet.getInt("duration"))
-                .build();
     }
 }

@@ -9,8 +9,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -26,14 +24,14 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public Set<Genre> getAllGenres() {
         String sqlQuery = "select * from genres order by id";
-        return new LinkedHashSet<>(jdbcTemplate.query(sqlQuery, this::mapRowToGenre));
+        return new LinkedHashSet<>(jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToGenre));
     }
 
     @Override
     public Optional<Genre> findGenreById(Integer id) {
         String sqlQuery = "select * from genres where id = ?";
         try {
-            Genre genre = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, id);
+            Genre genre = jdbcTemplate.queryForObject(sqlQuery, MapRowClass::mapRowToGenre, id);
             return Optional.ofNullable(genre);
         } catch (DataAccessException e) {
             throw new NotFoundException("Id doesn't exist." + id);
@@ -44,13 +42,6 @@ public class GenreDbStorage implements GenreStorage {
     public Set<Genre> getAllGenresByFilm(Long id) {
         String sqlQuery = "select * from genres where id in " +
                 "(select genre_id from film_genres where film_id = ?)";
-        return new HashSet<>(jdbcTemplate.query(sqlQuery, this::mapRowToGenre, id));
-    }
-
-    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
-        return Genre.builder()
-                .id(resultSet.getInt("id"))
-                .name(resultSet.getString("name"))
-                .build();
+        return new HashSet<>(jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToGenre, id));
     }
 }

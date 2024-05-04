@@ -10,8 +10,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,14 +50,14 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getAllUsers() {
         String sqlQuery = "select * from users";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
+        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToUser);
     }
 
     @Override
     public Optional<User> findUserById(Long id) {
         String sqlQuery = "select * from users where id = ?";
         try {
-            User user = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
+            User user = jdbcTemplate.queryForObject(sqlQuery, MapRowClass::mapRowToUser, id);
             return Optional.ofNullable(user);
         } catch (DataAccessException e) {
             throw new NotFoundException("Id doesn't exist. " + id);
@@ -83,7 +81,7 @@ public class UserDbStorage implements UserStorage {
     public List<User> getFriends(Long id) {
         String sqlQuery = "select * from users where id in " +
                 "(select friend_id from users_friendship where user_id = ?)";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id);
+        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToUser, id);
     }
 
     @Override
@@ -91,7 +89,7 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "select * from users where id in " +
                 "(select friend_id from users_friendship where user_id = ?) " +
                 "and id in (select friend_id from users_friendship where user_id = ?)";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, userFirst, userSecond);
+        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToUser, userFirst, userSecond);
     }
 
     private Map<String, Object> toMap(User user) {
@@ -102,15 +100,5 @@ public class UserDbStorage implements UserStorage {
         values.put("name", user.getName());
         values.put("birthday", user.getBirthday());
         return values;
-    }
-
-    private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
-        return User.builder()
-                .id(resultSet.getLong("id"))
-                .email(resultSet.getString("email"))
-                .login(resultSet.getString("login"))
-                .name(resultSet.getString("name"))
-                .birthday(resultSet.getDate("birthday").toLocalDate())
-                .build();
     }
 }
